@@ -49,29 +49,29 @@ uploadPanel.appendChild(uploadNote);
 document.body.appendChild(uploadPanel);
 const infoPanel = document.createElement('div');
 infoPanel.style.position = 'absolute';
-infoPanel.style.top = '10px';
-infoPanel.style.left = '5px';
-infoPanel.style.width = '300px';
+infoPanel.style.top = '20px';
+infoPanel.style.left = '20px';
+infoPanel.style.width = '330px';
 infoPanel.style.background = 'rgba(0, 0, 0, 0.95)';
 infoPanel.style.color = '#f1f1f1ff';
 infoPanel.style.borderRadius = '8px';
 infoPanel.style.fontSize = '15px';
 infoPanel.style.fontWeight = 'normal';
-infoPanel.style.padding = '32px';
+infoPanel.style.padding = '20px';
 infoPanel.style.zIndex = '40';
 infoPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
 infoPanel.innerHTML = `
-  <b>How to move camera position</b><br>
+  <b>How to move camera position in VR/AR</b><br>
   <ul style="margin:8px 0 0 10px;padding:0;">
-    <li>left/right/forward/backward: joysticks</li>
-    <li>up/down: hold trigger button + joysticks</li>
+    <li>left/right/forward/backward: <b>joysticks</b></li>
+    <li>up/down: <b>hold trigger button + joysticks</b></li>
   </ul>
 `;
 document.body.appendChild(infoPanel);
 // --- Scale Panel UI ---
 const scalePanel = document.createElement('div');
 scalePanel.style.position = 'absolute';
-scalePanel.style.top = '70px';
+scalePanel.style.top = '20px';
 scalePanel.style.right = '20px';
 scalePanel.style.left = '';
 scalePanel.style.width = '140px';
@@ -104,7 +104,7 @@ if (scaleBar) {
 }
 import './style.css'
 import * as THREE from 'three';
-import { GLTFLoader, VRButton, XRControllerModelFactory, OrbitControls } from 'three-stdlib';
+import { GLTFLoader, VRButton, XRControllerModelFactory, OrbitControls, ARButton } from 'three-stdlib';
 
 // --- GLB Uploader ---
 uploadInput.addEventListener('change', () => {
@@ -150,10 +150,38 @@ renderer.domElement.style.top = '0';
 renderer.domElement.style.width = '100vw';
 renderer.domElement.style.height = '100vh';
 renderer.domElement.style.zIndex = '0';
-document.body.appendChild(VRButton.createButton(renderer));
-// Change VRButton background color and position (top right), and move scale panel below it
+const vrButton = VRButton.createButton(renderer);
+document.body.appendChild(vrButton);
+const arButton = ARButton.createButton(renderer, { requiredFeatures: [ 'hit-test' ] });
+document.body.appendChild(arButton);
+
+// --- Set custom text for VR and AR buttons, even if changed by WebXR polyfill ---
+function setButtonText(btn: HTMLElement, text: string, notSupported = false) {
+  // Always show the mode text
+  btn.textContent = text;
+  btn.style.textDecoration = notSupported ? 'line-through' : 'none';
+  // Observe for future changes (WebXR polyfill may change it)
+  const observer = new MutationObserver(() => {
+    if (btn.textContent !== text) btn.textContent = text;
+    btn.style.textDecoration = notSupported ? 'line-through' : 'none';
+  });
+  observer.observe(btn, { childList: true, subtree: true, characterData: true });
+}
+
+// Detect WebXR support for VR and AR
+const isVRSupported = navigator.xr && navigator.xr.isSessionSupported ? navigator.xr.isSessionSupported('immersive-vr') : Promise.resolve(false);
+const isARSupported = navigator.xr && navigator.xr.isSessionSupported ? navigator.xr.isSessionSupported('immersive-ar') : Promise.resolve(false);
+
+isVRSupported.then((supported) => {
+  setButtonText(vrButton as HTMLElement, 'VR MODE', !supported);
+});
+isARSupported.then((supported) => {
+  setButtonText(arButton as HTMLElement, 'AR MODE', !supported);
+});
+// Style VR and AR buttons side by side in the top right
 setTimeout(() => {
-  const vrBtn = document.querySelector('.vr-button') || document.querySelector('button');
+  const vrBtn = vrButton;
+  const arBtn = arButton;
   if (vrBtn) {
     (vrBtn as HTMLElement).style.background = '#000000ff';
     (vrBtn as HTMLElement).style.color = '#fff';
@@ -161,11 +189,11 @@ setTimeout(() => {
     (vrBtn as HTMLElement).style.fontWeight = 'bold';
     (vrBtn as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
     (vrBtn as HTMLElement).style.position = 'absolute';
-    (vrBtn as HTMLElement).style.top = '20px';
+    (vrBtn as HTMLElement).style.top = '70px';
     (vrBtn as HTMLElement).style.right = '20px';
     (vrBtn as HTMLElement).style.left = '';
     (vrBtn as HTMLElement).style.zIndex = '30';
-    (vrBtn as HTMLElement).style.width = '140px';
+    (vrBtn as HTMLElement).style.width = '160px';
     (vrBtn as HTMLElement).style.height = '40px';
     (vrBtn as HTMLElement).style.fontSize = '16px';
     (vrBtn as HTMLElement).style.padding = '0 10px';
@@ -173,6 +201,26 @@ setTimeout(() => {
     (vrBtn as HTMLElement).style.display = 'flex';
     (vrBtn as HTMLElement).style.alignItems = 'center';
     (vrBtn as HTMLElement).style.justifyContent = 'center';
+  }
+  if (arBtn) {
+    (arBtn as HTMLElement).style.background = '#000000ff';
+    (arBtn as HTMLElement).style.color = '#fff';
+    (arBtn as HTMLElement).style.borderRadius = '8px';
+    (arBtn as HTMLElement).style.fontWeight = 'bold';
+    (arBtn as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+    (arBtn as HTMLElement).style.position = 'absolute';
+    (arBtn as HTMLElement).style.top = '120px';
+    (arBtn as HTMLElement).style.right = '20px';
+    (arBtn as HTMLElement).style.left = '';
+    (arBtn as HTMLElement).style.zIndex = '30';
+    (arBtn as HTMLElement).style.width = '160px';
+    (arBtn as HTMLElement).style.height = '40px';
+    (arBtn as HTMLElement).style.fontSize = '16px';
+    (arBtn as HTMLElement).style.padding = '0 10px';
+    (arBtn as HTMLElement).style.margin = '0';
+    (arBtn as HTMLElement).style.display = 'flex';
+    (arBtn as HTMLElement).style.alignItems = 'center';
+    (arBtn as HTMLElement).style.justifyContent = 'center';
   }
   // Scale panel is already styled above
 }, 100);
