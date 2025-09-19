@@ -104,7 +104,7 @@ if (scaleBar) {
 }
 import './style.css'
 import * as THREE from 'three';
-import { GLTFLoader, VRButton, XRControllerModelFactory } from 'three-stdlib';
+import { GLTFLoader, VRButton, XRControllerModelFactory, OrbitControls } from 'three-stdlib';
 
 // --- GLB Uploader ---
 uploadInput.addEventListener('change', () => {
@@ -177,6 +177,16 @@ setTimeout(() => {
   // Scale panel is already styled above
 }, 100);
 
+// --- OrbitControls for mouse/touchscreen navigation ---
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false;
+controls.minDistance = 1;
+controls.maxDistance = 1000;
+controls.target.set(0, 1.6, 0);
+controls.update();
+
 const light = new THREE.HemisphereLight(0xffffff, 0x444444);
 light.position.set(0, 20, 0);
 light.intensity = 2.0;
@@ -223,7 +233,8 @@ setupControllers();
 
 function animate() {
   renderer.setAnimationLoop(() => {
-    // Joystick movement using XRSession inputSources
+    controls.update();
+    // VR movement logic remains for VR users
     const session = renderer.xr.getSession();
     if (session && session.inputSources.length >= 2) {
       for (let i = 0; i < 2; i++) {
