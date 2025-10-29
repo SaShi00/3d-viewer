@@ -1,20 +1,24 @@
+# Install nvs
+1. Check how to install on https://github.com/jasongin/nvs
+2. `winget install jasongin.nvs`
+3. `source ~/AppData/Local/nvs/nvs.sh` in .bashrc
+
+## To use nvs
+- `nvs add X.X.X` # X.X.X should be node.js version
+- `nvs ls` # show which node.js versions you installed in your laptop
+- `nvs use X.X.X` # now you can use node.js. In this case, `nvs use 22`
+
 # Create a project at first time
 1. `npm create vite@latest XXX`
 2. `cd XXX`
 3. `npm install`
 4. `npm install three @react-three/fiber@9` # if react19 is used, fiber@9. if react18, fiber@8
 
+# Run frontend
+`npm run dev`
 
-# Install nvs
-1. Check how to install on https://github.com/jasongin/nvs
-2. `winget install jasongin.nvs`
-3. `source ~/AppData/Local/nvs/nvs.sh` in .bashrc
-
-# To use nvs
-- `nvs add X.X.X` # X.X.X should be node.js version
-- `nvs ls` # show which node.js versions you installed in your laptop
-- `nvs use X.X.X` # now you can use node.js
-
+# Run backend
+`node backend/server.js`
 
 # Android Debug Bridge
 This can communicate between laptop and vr headset for debug
@@ -30,4 +34,8 @@ This can communicate between laptop and vr headset for debug
 2. open terminal
 3. `adb devices` # show what andloid devices are connected in your laptop
 4. `adb reverse tcp:5173 tcp:5173` # bridge between your laptop's localhost:5173 to the vr headset (you need to visit same localhost name on any browser in the headset)
-5. `adb reverse --remove-all` # disconnect
+5. `adb reverse tcp:3001 tcp:3001`
+6. `adb reverse --remove-all` # disconnect
+
+# Final product idea
+![summary](./public/summary.png)
