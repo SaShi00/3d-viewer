@@ -39,7 +39,7 @@ jobs:
         run: npm install
       - name: Build app
         run: npm run build
-        env: VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
+        env: VITE_BACKEND_URL:${{ secrets.VITE_BACKEND_URL }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
