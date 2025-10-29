@@ -17,8 +17,14 @@
 // The backend/admin will provide a scale value for guests before they load the model.
 
 
-// Use current browser location for API base (adapts to localhost, LAN, etc.)
-const apiBase = `${window.location.protocol}//${window.location.hostname}:3001`;
+// API base selection:
+// - Use explicit Vite env var VITE_BACKEND_URL when provided (e.g. production render URL).
+// - Otherwise fall back to current host on port 3001 (convenient for local dev).
+// To point the app at your deployed backend, set VITE_BACKEND_URL to
+// "https://threed-viewer-backend-ef6x.onrender.com" in your environment.
+const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_BACKEND_URL)
+  ? String((import.meta as any).env.VITE_BACKEND_URL)
+  : `${window.location.protocol}//${window.location.hostname}:3001`;
 
 
 declare global {
@@ -390,7 +396,10 @@ import { GLTFLoader, VRButton, XRControllerModelFactory, OrbitControls, ARButton
 import io from 'socket.io-client';
 
 // --- SOCKET.IO SETUP ---
-const socket = io(`${window.location.protocol}//${window.location.hostname}:3001`);
+// Initialize socket using the same apiBase (will use VITE_BACKEND_URL if set).
+// Pass apiBase directly so socket.io-client connects to the deployed Render URL
+// when provided, or to local :3001 during development.
+const socket = io(apiBase, { transports: ['websocket', 'polling'] });
 
 // --- POINTER (RED BALL) ---
 const pointerGeometry = new THREE.SphereGeometry(0.15, 32, 32);
