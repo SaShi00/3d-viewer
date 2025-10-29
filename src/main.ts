@@ -21,7 +21,6 @@
 // - Use explicit Vite env var VITE_BACKEND_URL when provided (e.g. production render URL).
 // - Otherwise fall back to current host on port 3001 (convenient for local dev).
 // To point the app at your deployed backend, set VITE_BACKEND_URL to
-// "https://threed-viewer-backend-ef6x.onrender.com" in your environment.
 const apiBase = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_BACKEND_URL)
   ? String((import.meta as any).env.VITE_BACKEND_URL)
   : `${window.location.protocol}//${window.location.hostname}:3001`;
@@ -59,6 +58,21 @@ loginTitle.style.color = '#fff';
 loginTitle.style.margin = '0 0 8px 0';
 loginPanel.appendChild(loginTitle);
 
+// Visible password input (placed above the Admin/Guest buttons)
+const passwordInput = document.createElement('input');
+passwordInput.type = 'password';
+passwordInput.id = 'login-password';
+passwordInput.placeholder = 'Password';
+passwordInput.style.padding = '8px 10px';
+passwordInput.style.borderRadius = '6px';
+passwordInput.style.border = '1px solid rgba(255,255,255,0.12)';
+passwordInput.style.background = 'transparent';
+passwordInput.style.color = '#fff';
+passwordInput.style.width = '220px';
+passwordInput.style.boxSizing = 'border-box';
+passwordInput.style.textAlign = 'center';
+passwordInput.autocomplete = 'off';
+loginPanel.appendChild(passwordInput);
 const adminBtn = document.createElement('button');
 adminBtn.textContent = 'Admin';
 adminBtn.style.width = '180px';
@@ -69,11 +83,41 @@ guestBtn.textContent = 'Guest';
 guestBtn.style.width = '180px';
 
 adminBtn.onclick = () => {
+  // Validate against build-time password (if configured). Read value from visible input.
+  const buildPwd = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_PASSWORD)
+    ? String((import.meta as any).env.VITE_PASSWORD)
+    : '';
+  const attempt = passwordInput.value || '';
+  if (buildPwd) {
+    if (attempt !== buildPwd) {
+      alert('Incorrect password');
+      return;
+    }
+  } else {
+    console.warn('No VITE_PASSWORD configured at build time; login is not password protected.');
+  }
+  // Clear password field after use
+  passwordInput.value = '';
   userRole = 'admin';
   loginPanel.style.display = 'none';
   showMainUI();
 };
 guestBtn.onclick = () => {
+  // Validate against build-time password (if configured). Read value from visible input.
+  const buildPwd = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_PASSWORD)
+    ? String((import.meta as any).env.VITE_PASSWORD)
+    : '';
+  const attempt = passwordInput.value || '';
+  if (buildPwd) {
+    if (attempt !== buildPwd) {
+      alert('Incorrect password');
+      return;
+    }
+  } else {
+    console.warn('No VITE_PASSWORD configured at build time; login is not password protected.');
+  }
+  // Clear password field after use
+  passwordInput.value = '';
   userRole = 'guest';
   loginPanel.style.display = 'none';
   // Wait for scale from admin before showing UI and loading model
